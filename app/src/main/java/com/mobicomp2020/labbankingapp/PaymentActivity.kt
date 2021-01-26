@@ -1,11 +1,64 @@
 package com.mobicomp2020.labbankingapp
 
+import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
+import androidx.room.Room
+import com.mobicomp2020.bankingapp.db.AppDatabase
+import com.mobicomp2020.bankingapp.db.PaymentInfo
+import com.mobicomp2020.labbankingapp.databinding.ActivityPaymentBinding
+import java.util.*
+
 
 class PaymentActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityPaymentBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_payment)
+        binding = ActivityPaymentBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+
+        binding.btnAccept.setOnClickListener {
+            //validate entry values here
+            if (binding.txtDate.text.isEmpty()) {
+                Toast.makeText(
+                    applicationContext,
+                    "Date should not be empty and should be in dd.mm.yyyy format",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            val paymentInfo = PaymentInfo(
+                null,
+                name = binding.txtRecipient.text.toString(),
+                accountNumber = binding.txtAccount.text.toString(),
+                date = binding.txtDate.text.toString(),
+                amount = binding.txtAccount.text.toString()
+            )
+
+            //convert date  string value to Date format using dd.mm.yyyy
+            // here it is asummed that date is in dd.mm.yyyy
+            val dateparts = paymentInfo.date.split(".").toTypedArray()
+            val calender = GregorianCalendar(
+                dateparts[2].toInt(),
+                dateparts[1].toInt() - 1,
+                dateparts[0].toInt()
+            )
+
+            AsyncTask.execute {
+                //save payment to room datbase
+                val db = Room.databaseBuilder(
+                    applicationContext,
+                    AppDatabase::class.java,
+                    getString(R.string.dbFileName)
+                ).build()
+                val uuid = db.paymentDao().insert(paymentInfo).toInt()
+                db.close()
+            }
+            finish()
+        }
     }
 }

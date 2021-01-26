@@ -61,7 +61,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView6"
+        android:id="@+id/txtPaymentHistory"
         android:layout_width="360dp"
         android:layout_height="52dp"
         android:layout_marginTop="312dp"
