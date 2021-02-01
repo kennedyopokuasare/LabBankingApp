@@ -3,7 +3,6 @@ package com.mobicomp2020.labbankingapp
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
 import android.widget.Toast
 import androidx.room.Room
 import com.mobicomp2020.bankingapp.db.AppDatabase
@@ -36,13 +35,13 @@ class PaymentActivity : AppCompatActivity() {
                 name = binding.txtRecipient.text.toString(),
                 accountNumber = binding.txtAccount.text.toString(),
                 date = binding.txtDate.text.toString(),
-                amount = binding.txtAccount.text.toString()
+                amount = binding.txtAmount.text.toString()
             )
 
             //convert date  string value to Date format using dd.mm.yyyy
             // here it is asummed that date is in dd.mm.yyyy
             val dateparts = paymentInfo.date.split(".").toTypedArray()
-            val calender = GregorianCalendar(
+            val paymentCalender = GregorianCalendar(
                 dateparts[2].toInt(),
                 dateparts[1].toInt() - 1,
                 dateparts[0].toInt()
@@ -57,6 +56,27 @@ class PaymentActivity : AppCompatActivity() {
                 ).build()
                 val uuid = db.paymentDao().insert(paymentInfo).toInt()
                 db.close()
+
+                // payment happens in the future set reminder
+                if (paymentCalender.timeInMillis > Calendar.getInstance().timeInMillis) {
+                    // payment happens in the future set reminder
+                    val message =
+                        "Pay ${paymentInfo.name}  ${paymentInfo.amount} into account ${paymentInfo.accountNumber}"
+                    PaymentHistory.setRemnder(
+                        applicationContext,
+                        uuid,
+                        paymentCalender.timeInMillis,
+                        message
+                    )
+                }
+            }
+
+            if(paymentCalender.timeInMillis>Calendar.getInstance().timeInMillis){
+                Toast.makeText(
+                    applicationContext,
+                    "Reminder for future payment saved.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             finish()
         }
