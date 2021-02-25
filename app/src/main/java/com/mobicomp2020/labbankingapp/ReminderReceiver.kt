@@ -3,7 +3,6 @@ package com.mobicomp2020.labbankingapp
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.mobicomp2020.labbankingapp.PaymentHistory
 
 class ReminderReceiver :BroadcastReceiver(){
     override fun onReceive(context: Context?, intent: Intent?) {

@@ -16,9 +16,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.room.Room
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.mobicomp2020.bankingapp.db.AppDatabase
 import com.mobicomp2020.bankingapp.db.PaymentInfo
 import com.mobicomp2020.labbankingapp.databinding.ActivityPaymentHistoryBinding
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 
@@ -154,6 +158,31 @@ class PaymentHistory : AppCompatActivity() {
 
             notificationManager.notify(notificationId, notificationBuilder.build())
 
+        }
+
+        fun setReminderWithWorkManager(
+            context: Context,
+            uid: Int,
+            timeInMillis: Long,
+            message: String
+        ) {
+
+            val reminderParameters = Data.Builder()
+                .putString("message", message)
+                .putInt("uid", uid)
+                .build()
+
+            // get minutes from now until reminder
+            var minutesFromNow = 0L
+            if (timeInMillis > System.currentTimeMillis())
+                minutesFromNow = timeInMillis - System.currentTimeMillis()
+
+            val reminderRequest = OneTimeWorkRequestBuilder<ReminderWorker>()
+                .setInputData(reminderParameters)
+                .setInitialDelay(minutesFromNow, TimeUnit.MILLISECONDS)
+                .build()
+
+            WorkManager.getInstance(context).enqueue(reminderRequest)
         }
 
         fun setRemnder(context: Context, uid: Int, timeInMillis: Long, message: String) {
